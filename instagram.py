@@ -169,6 +169,7 @@ class Scraper():
             df = pd.DataFrame(user_details)
             if 'interop_messaging_user_fbid' not in df.columns:
                 df['interop_messaging_user_fbid'] = ""
+            df['session_id'] = self.cookie
             df = df.dropna(subset=['full_name', 'biography',"follower_count"])
             df = df.fillna('')
             user_details = df.to_dict('records')
