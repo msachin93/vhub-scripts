@@ -49,6 +49,7 @@ class Scraper():
         url = f"https://i.instagram.com/api/v1/users/web_profile_info/?username={account.username}"
         res = self.session.get(url).json()['data']['user']
         account.__dict__.update(res)
+        self.get_user_from_id(self, account)
 
     def get_posts_from_username(self, account):
         url = f"https://i.instagram.com/api/v1/feed/user/{account.username}/username/?count=1000"
