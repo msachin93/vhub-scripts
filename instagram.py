@@ -15,8 +15,8 @@ class Scraper():
                         'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_3_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Instagram 105.0.0.11.118 (iPhone11,8; iOS 12_3_1; en_US; en-US; scale=2.00; 828x1792; 165586599)'
                         }
         self.user = user
-        # self.url_prefix = "http://127.0.0.1:5000/vedasis/scraping"
-        self.url_prefix = "https://vhub-admin-backend-bsng2qeg2a-em.a.run.app/vedasis/scraping"
+        self.url_prefix = "http://127.0.0.1:5000/vedasis/scraping"
+        # self.url_prefix = "https://vhub-admin-backend-bsng2qeg2a-em.a.run.app/vedasis/scraping"
 
         self.profile_pics = []
         self.iterations = iters
@@ -62,11 +62,9 @@ class Scraper():
             url = f"https://i.instagram.com/api/v1/friendships/{user}/following/?count=200"
             if max_id != "":
                 url = url + "&max_id=" + max_id
-            print(url)
             req = requests.get(url, headers=self.headers)
             temp = pd.DataFrame(req.json()['users'])
             output = pd.concat([output, temp])
-            print(len(temp), len(output))
             if ('next_max_id' in req.json().keys()):
                 max_id = req.json()['next_max_id']
             else:
@@ -76,35 +74,47 @@ class Scraper():
         return(output)
 
 
-    def fetch_ig_following(self,table_name):
-        counter = 0
+    def fetch_ig_following(self):
+        self.counter = 0
         while (self.iterations > 0):
-            if (counter > 10):
+            if (self.counter > 5):
                 break
-            url = self.url_prefix + '/fetch_userids_following_list/' + self.user
-            users = requests.get(url,headers={"table_name":table_name}).json()
+            time.sleep(random.uniform(1, 4))
+            print('fetching ids')
+            url = self.url_prefix + '/fetch_userids_for_following/' + self.user
+            users = requests.get(url).json()
+            print(len(users), ' ids ready to be scraped')
             if (len(users) == 0):
                 break
-            print(users)
             output = pd.DataFrame()
+            n=0
             for user in users:
+                if (self.counter > 5):
+                    break
                 try:
                     df = self.get_following_list(user)
-                    df['main_id'] = user
-                    output = pd.concat([output, df])
-                    print(user)
-                    counter = 0
+                    if (len(df)>50):
+                        df['main_id'] = user
+                        output = pd.concat([output, df])
+                        n+=1
+                        print(user, n)
+                    else:
+                        print(user, "data too small")
+                    self.counter = 0
                 except Exception as e:
-                    print(user, e)
-                    counter = counter + 1
+                    print('error ', user, e)
+                    self.counter = self.counter + 1
 
             url = self.url_prefix + '/push_igdata_following'
+            output['person'] = self.user
+            output['session_id'] = self.cookie
             output = output.fillna('')
 
             for _ in range(3):
                 response = requests.post(url, json=output.to_dict('records'))
                 if response.status_code == 200:
-                    print('data_pushed', len(output))
+                    print('profiles_pushed', output['main_id'].nunique())
+                    print('rows_pushed', len(output))
                     break
                 elif response.status_code == 503:
                     print('Server temporarily unavailable, retrying...')
@@ -112,6 +122,7 @@ class Scraper():
                 else:
                     print(response,"storing it as csv file ")
                     output.to_csv(f"following_push_error{random.randint(0,9999999)}.csv")
+                    self.counter=10
                     break
 
             self.iterations -= 1
