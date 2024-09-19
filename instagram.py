@@ -97,10 +97,13 @@ class Scraper():
                     df = self.get_following_list(user)
                     if (len(df)>50):
                         df['main_id'] = user
-                        output = pd.concat([output, df])
                         if n//2 ==1:
+                            output['session_id'] = 'count-'
                             print(user, n)
                             c+=1
+                        else:
+                            output['session_id'] = ''
+                        output = pd.concat([output, df])
                     else:
                         if n//2 ==1:
                             print(user, "data too small")
@@ -111,7 +114,7 @@ class Scraper():
 
             url = self.url_prefix + '/push_igdata_following'
             output['person'] = self.user
-            output['session_id'] = self.cookie
+            output['session_id'] = output['session_id'] + self.cookie
             output = output.fillna('')
 
             for _ in range(3):
@@ -152,13 +155,17 @@ class Scraper():
                     break
                 time.sleep(random.uniform(1, 4))
                 try:
-                    if n//2==1:
-                        print(x['username'], x['id'], x['cnt'])
                     a = ig_account({'id': x['id'], 'username': x['username']})
                     if (x['id']=="" or x['id'] is None):
                       self.get_user_from_username(a)
                     else:
                       self.get_user_from_id(a)
+                    
+                    if n//2==1:
+                        print(x['username'], x['id'], x['cnt'])
+                        a.session_id = 'count-'
+                    else:
+                        a.session_id = ''
                     user_details.append(a.__dict__.copy())
                     try:
                       self.check_profile_pic(a.id,a.hd_profile_pic_versions[0]['url'])
@@ -190,7 +197,7 @@ class Scraper():
             df = pd.DataFrame(user_details)
             if 'interop_messaging_user_fbid' not in df.columns:
                 df['interop_messaging_user_fbid'] = ""
-            df['session_id'] = self.cookie
+            df['session_id'] = df['session_id'] + self.cookie
             df = df.dropna(subset=['full_name', 'biography',"follower_count"])
             df = df.fillna('')
             user_details = df.to_dict('records')
