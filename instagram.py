@@ -100,6 +100,7 @@ class Scraper():
                         if n%2 ==1:
                             df['session_id'] = 'count-'
                             print(user)
+                            c+=1
                         else:
                             df['session_id'] = ''
                         output = pd.concat([output, df])
