@@ -88,7 +88,9 @@ class Scraper():
                 break
             output = pd.DataFrame()
             n=0
+            c=0
             for user in users:
+                n+=1
                 if (self.counter > 5):
                     break
                 try:
@@ -96,10 +98,12 @@ class Scraper():
                     if (len(df)>50):
                         df['main_id'] = user
                         output = pd.concat([output, df])
-                        n+=1
-                        print(user, n)
+                        if n//2 ==1:
+                            print(user, n)
+                            c+=1
                     else:
-                        print(user, "data too small")
+                        if n//2 ==1:
+                            print(user, "data too small")
                     self.counter = 0
                 except Exception as e:
                     print('error ', user, e)
@@ -113,8 +117,7 @@ class Scraper():
             for _ in range(3):
                 response = requests.post(url, json=output.to_dict('records'))
                 if response.status_code == 200:
-                    print('profiles_pushed', output['main_id'].nunique())
-                    print('rows_pushed', len(output))
+                    print('profiles_pushed', c)
                     break
                 elif response.status_code == 503:
                     print('Server temporarily unavailable, retrying...')
@@ -141,12 +144,16 @@ class Scraper():
             user_details = []
             post_details = []
             self.profile_pics = []
+            n=0
+            c=0
             for x in accounts:
+                n+=1
                 if (self.counter > 20):
                     break
                 time.sleep(random.uniform(1, 4))
                 try:
-                    print(x['username'], x['id'], x['cnt'], len(user_details))
+                    if n//2==1:
+                        print(x['username'], x['id'], x['cnt'])
                     a = ig_account({'id': x['id'], 'username': x['username']})
                     if (x['id']=="" or x['id'] is None):
                       self.get_user_from_username(a)
@@ -160,8 +167,11 @@ class Scraper():
                     self.get_posts_from_username(a)
                     post_details = post_details + a.posts
                     self.counter = 0
+                    if n//2==1:
+                        c+=1
                 except Exception as e:
-                    print(e)
+                    if n//2==1:
+                        print(e)
                     self.counter = self.counter + 1
 
 
@@ -195,9 +205,9 @@ class Scraper():
                 print(response)
                 break
             else:
-                print('Users data_pushed ', len(user_details), response.json()['users_pushed'])
-                print('Posts data_pushed ', len(output), response.json()['posts_pushed'])
-                print('Profile pics uploaded ', len(self.profile_pics))
+                print('Users data_pushed ', c)
+                # print('Posts data_pushed ', len(output), response.json()['posts_pushed'])
+                # print('Profile pics uploaded ', len(self.profile_pics))
 
             self.iterations -= 1
 
