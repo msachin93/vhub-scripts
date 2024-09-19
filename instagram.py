@@ -97,7 +97,7 @@ class Scraper():
                     df = self.get_following_list(user)
                     if (len(df)>50):
                         df['main_id'] = user
-                        if n//2 ==1:
+                        if n%2 ==1:
                             output['session_id'] = 'count-'
                             print(user, n)
                             c+=1
@@ -105,11 +105,12 @@ class Scraper():
                             output['session_id'] = ''
                         output = pd.concat([output, df])
                     else:
-                        if n//2 ==1:
+                        if n%2 ==1:
                             print(user, "data too small")
                     self.counter = 0
                 except Exception as e:
-                    print('error ', user, e)
+                    if n%2==1:
+                        print('error ', user, e)
                     self.counter = self.counter + 1
 
             url = self.url_prefix + '/push_igdata_following'
@@ -155,14 +156,15 @@ class Scraper():
                     break
                 time.sleep(random.uniform(1, 4))
                 try:
+                    if n%2==1:
+                        print(x['username'], x['id'], x['cnt'])
                     a = ig_account({'id': x['id'], 'username': x['username']})
                     if (x['id']=="" or x['id'] is None):
                       self.get_user_from_username(a)
                     else:
                       self.get_user_from_id(a)
                     
-                    if n//2==1:
-                        print(x['username'], x['id'], x['cnt'])
+                    if n%2==1:
                         a.session_id = 'count-'
                     else:
                         a.session_id = ''
@@ -174,10 +176,10 @@ class Scraper():
                     self.get_posts_from_username(a)
                     post_details = post_details + a.posts
                     self.counter = 0
-                    if n//2==1:
+                    if n%2==1:
                         c+=1
                 except Exception as e:
-                    if n//2==1:
+                    if n%2==1:
                         print(e)
                     self.counter = self.counter + 1
 
