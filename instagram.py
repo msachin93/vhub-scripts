@@ -83,7 +83,7 @@ class Scraper():
             print('fetching ids')
             url = self.url_prefix + '/fetch_userids_for_following/' + self.user
             users = requests.get(url).json()
-            print(len(users), ' ids ready to be scraped')
+            print(int(len(users)/2), ' ids ready to be scraped')
             if (len(users) == 0):
                 break
             output = pd.DataFrame()
@@ -140,7 +140,7 @@ class Scraper():
             #users=   [{'username':'shubhirajthakur','id':''},{'username':'vickey120878','id':''}]
             if (len(accounts) == 0):
                 break
-            print(len(accounts),'ids ready to get scraped')
+            print(int(len(accounts)/2),'ids ready to get scraped')
             user_details = []
             post_details = []
             self.profile_pics = []
