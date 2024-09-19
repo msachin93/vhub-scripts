@@ -98,10 +98,10 @@ class Scraper():
                     if (len(df)>50):
                         df['main_id'] = user
                         if n%2 ==1:
-                            output['session_id'] = 'count-'
+                            df['session_id'] = 'count-'
                             print(user)
                         else:
-                            output['session_id'] = ''
+                            df['session_id'] = ''
                         output = pd.concat([output, df])
                     else:
                         if n%2 ==1:
