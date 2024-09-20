@@ -16,7 +16,7 @@ class Scraper():
                         }
         self.user = user
         # self.url_prefix = "http://127.0.0.1:5000/vedasis/scraping"
-        self.url_prefix = "https://vhub-admin-backend-bsng2qeg2a-em.a.run.app/vedasis/scraping"
+        self.url_prefix = "https://vhub-scraping-bsng2qeg2a-em.a.run.app/vedasis/scraping"
 
         self.profile_pics = []
         self.iterations = iters
